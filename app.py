@@ -1,17 +1,17 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
 from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 import os
 
 app = Flask(__name__)
+app.secret_key = "student-performance-secret"  # required for session
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
-    return render_template("home.html")
+    result = session.pop("result", None)
+    return render_template("home.html", results=result)
 
 @app.route("/predictdata", methods=["POST"])
 def predict_datapoint():
-    print("FORM DATA:", request.form)
-
     data = CustomData(
         gender=request.form["gender"],
         race_ethnicity=request.form["ethnicity"],
@@ -26,9 +26,11 @@ def predict_datapoint():
     pipeline = PredictPipeline()
     result = round(float(pipeline.predict(pred_df)[0]), 2)
 
-    print("PREDICTION:", result)
+    # store result temporarily
+    session["result"] = result
 
-    return render_template("home.html", results=result)
+    # redirect browser to /
+    return redirect(url_for("home"))
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
