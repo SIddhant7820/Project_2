@@ -30,7 +30,7 @@ class DataIngestion:
             df=pd.read_csv('notebook\\data\\stud.csv')
             logging.info('read the dataset')
 
-            # Creates directory for train data path
+            # Creates directory for data path
             os.makedirs(os.path.dirname(self.IngestionConfig.train_data_path),exist_ok= True)
 
             # Save Raw Data As CSV
