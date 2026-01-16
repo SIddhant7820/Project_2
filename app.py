@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, abort
 from src.pipeline.predict_pipeline import CustomData, PredictPipeline
 import os
 
 app = Flask(__name__)
-app.secret_key = "student-performance-secret"  # required for session
+app.secret_key = "student-performance-secret"
 
 @app.route("/", methods=["GET"])
 def home():
@@ -26,11 +26,13 @@ def predict_datapoint():
     pipeline = PredictPipeline()
     result = round(float(pipeline.predict(pred_df)[0]), 2)
 
-    # store result temporarily
     session["result"] = result
-
-    # redirect browser to /
     return redirect(url_for("home"))
+
+# 🚨 HARD BLOCK: any GET to /predictdata
+@app.route("/predictdata", methods=["GET"])
+def block_get_predict():
+    abort(405)   # Method Not Allowed
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
